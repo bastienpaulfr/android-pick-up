@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <PreferenceCategory app:title="@string/settings_title_debug">
+
+        <Preference
+            android:key="key_export_log"
+            android:summary="@string/summary_log_export"
+            android:title="@string/tile_log_export"
+            app:icon="@drawable/ic_log_24" />
+
+        <Preference
+            android:key="key_clear_log"
+            android:summary="@string/summary_log_clear"
+            android:title="@string/tile_log_clear"
+            app:icon="@drawable/ic_delete_24" />
+
+        <SwitchPreference
+            android:key="key_verbose_debug"
+            android:summary="@string/summary_verbose_debug"
+            android:title="@string/tile_verbose_debug"
+            app:icon="@drawable/ic_wave_24" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

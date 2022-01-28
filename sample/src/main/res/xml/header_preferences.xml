@@ -1,0 +1,16 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <Preference
+        app:fragment="fr.bipi.sample.pickup.ui.settings.SettingsActivity$AppFragment"
+        app:icon="@drawable/ic_baseline_android_24"
+        app:key="app_header"
+        app:title="@string/settings_title_app" />
+
+    <Preference
+        app:icon="@drawable/ic_id_accent"
+        app:key="key_version"
+        app:title="@string/version_title"
+        />
+
+</PreferenceScreen>

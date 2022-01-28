@@ -1,0 +1,70 @@
+image: coppernic/docker-android-images:29
+
+before_script:
+  - eval $(ssh-agent -s)
+  ##
+  ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+  ## We're using tr to fix line endings which makes ed25519 keys work
+  ## without extra base64 encoding.
+  ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+  ##
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  ##
+  ## Create the SSH directory and give it the right permissions
+  ##
+  - echo -e "Host gitlab.coppernic.local\nStrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n\nHost gitlab-01.coppernic.local\nStrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n\nHost gitlab.coppernic.fr\nStrictHostKeyChecking no\nUserKnownHostsFile=/dev/null\n\n" > ~/.ssh/config
+
+stages:
+  - lint
+  - test
+  - deploy
+
+lintDebug:
+  stage: lint
+  script:
+    - ./gradlew -Pci --console=plain lintDebug
+  artifacts:
+    paths:
+      - app/build/reports/
+      - lib/build/reports/
+
+debugTests:
+  stage: test
+  script:
+    - ./gradlew -Pci --console=plain assemble test jacocoTestReport
+    - "echo \"$(cat app/build/jacoco/jacocoHtml/index.html)\""
+  artifacts:
+    paths:
+      - app/build/reports/
+      - app/build/jacoco/jacocoHtml/
+      - lib/build/reports/
+      - lib/build/jacoco/jacocoHtml/
+
+pages:
+  stage: deploy
+  dependencies:
+    - lintDebug
+    - debugTests
+  script:
+    - mkdir .jacocoApp
+    - cp -r app/build/jacoco/jacocoHtml/* .jacocoApp
+    - mkdir .jacocoLib
+    - cp -r lib/build/jacoco/jacocoHtml/* .jacocoLib
+    - mkdir .reportsApp
+    - cp -r app/build/reports/* .reportsApp
+    - mkdir .reportsLib
+    - cp -r lib/build/reports/* .reportsLib
+    - mkdir .public
+    - cp pages/index.html .public/index.html
+    - mv .public public
+    - mv .jacocoApp public/jacocoApp
+    - mv .reportsApp public/reportsApp
+    - mv .jacocoLib public/jacocoLib
+    - mv .reportsLib public/reportsLib
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+    - build
+    - jacoco
